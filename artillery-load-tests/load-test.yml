@@ -1,0 +1,43 @@
+config:
+
+  target: 'asciiart.artillery.io:8080'
+
+  phases:
+
+    - duration: 60
+
+      arrivalRate: 10
+
+      rampTo: 20
+
+      name: Ramp up load
+
+    - duration: 60
+
+      arrivalRate: 20
+
+      name: Steady load
+
+ 
+
+scenarios:
+
+  - name: Get animal pictures
+
+    flow:
+
+      - loop:
+
+        - get:
+
+            url: "/dino"
+
+        - get:
+
+            url: "/pony"
+
+        - get:
+
+            url: "/armadillo"
+
+        count: 50

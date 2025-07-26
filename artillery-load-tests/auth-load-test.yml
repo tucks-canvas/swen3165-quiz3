@@ -1,0 +1,51 @@
+config:
+  target: "http://localhost:9876"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Initial phase"
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 15
+      name: "Stress phase"
+  processor: "./helpers.js"
+
+scenarios:
+  - name: "Valid authentication flow"
+    flow:
+      - get:
+          url: "/authenticate"
+          qs:
+            username: "user_{{ $loopCount }}"
+            password: "user_{{ $loopCount }}"
+          capture:
+            - json: "$.sessionToken"
+              as: "capturedToken"
+          expect:
+            - statusCode: 200
+
+      - get:
+          url: "/session/keep-alive"
+          qs:
+            sessionToken: "{{ capturedToken }}"
+          expect:
+            - statusCode: 200
+
+  - name: "Invalid credentials"
+    flow:
+      - get:
+          url: "/authenticate"
+          qs:
+            username: "invalid"
+            password: "wrong"
+          expect:
+            - statusCode: 401
+
+  - name: "Invalid session token"
+    flow:
+      - get:
+          url: "/session/keep-alive"
+          qs:
+            sessionToken: "bogus_token"
+          expect:
+            - statusCode: 401
